@@ -6,7 +6,7 @@
   <meta name="description" content="开仓·现货 — OKX现货行情与模拟交易, 无杠杆无做空, T+0, 手续费0.1%">
   <title>开仓 · 现货 (OKX)</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪙</text></svg>">
-  <link rel="stylesheet" href="style.css?v=2026091301">
+  <link rel="stylesheet" href="style.css?v=2026091302">
 </head>
 <body>
   <header class="topbar">
@@ -20,6 +20,7 @@
         <option value="180">3分</option>
         <option value="0">手动</option>
       </select>
+      <button id="scanBtn" title="涨跌幅扫描 (快捷键S)">🔍 扫描</button>
       <button id="refreshBtn">🔄</button>
     </div>
     <div class="status">
@@ -28,6 +29,8 @@
       <span id="okxSrc" class="okx-src"></span>
     </div>
   </header>
+
+  <div class="coin-strip" id="coinStrip"><span class="loading">加载中…</span></div>
 
   <main>
     <div class="grid">
@@ -58,9 +61,25 @@
     </div>
   </main>
 
+  <!-- 涨跌幅扫描弹窗 -->
+  <div class="scan-overlay hidden" id="scanOverlay">
+    <div class="scan-modal">
+      <div class="scan-head">
+        <span>🔍 涨跌幅扫描 <span class="sub" id="scanSummary"></span></span>
+        <button class="scan-close" id="scanClose">&times;</button>
+      </div>
+      <div class="hot-wrap">
+        <table class="hot-table">
+          <thead><tr><th>#</th><th>币种</th><th>现价</th><th>1小时</th><th>4小时</th><th>24小时</th><th>7天</th><th>热度</th><th>结构</th><th>24h额</th></tr></thead>
+          <tbody id="scanBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
     数据源: OKX(实时优先, 不通时用GitHub Actions每10分钟快照) · 交易记录存本地浏览器 · 仅供学习研究
   </footer>
-  <script src="app.js?v=2026091301"></script>
+  <script src="app.js?v=2026091302"></script>
 </body>
 </html>

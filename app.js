@@ -71,6 +71,7 @@ function renderQuote() {
     mg("24h额", fmtVol(r.vol24)) + mg("1小时", pct(r.c1), clsOf(r.c1)) +
     mg("4小时", pct(r.c4), clsOf(r.c4)) + mg("7天", pct(r.c7), clsOf(r.c7));
   renderChart(r);
+  renderStrip();
   updateBuyPreview();
   renderPositions();
 }
@@ -205,6 +206,81 @@ function renderHistory() {
     </div>`;
   }).join("");
 }
+
+
+// ==================== 币种条 + 涨跌幅扫描 ====================
+function renderStrip() {
+  $("coinStrip").innerHTML = rows.map(r => `
+    <div class="cc-chip${r.sym === cur ? " active" : ""}" data-sym="${r.sym}" title="点击切换 ${r.sym}/USDT">
+      <div class="cc-sym">${r.sym}</div>
+      <div class="cc-price">${fmtP(r.price)}</div>
+      <div class="cc-chg ${clsOf(r.c24)}">${pct(r.c24)}</div>
+    </div>`).join("");
+  $("coinStrip").querySelectorAll(".cc-chip").forEach(el =>
+    el.addEventListener("click", () => {
+      cur = el.dataset.sym;
+      localStorage.setItem("spot_last", cur);
+      $("coinSel").value = cur;
+      renderQuote();
+    }));
+}
+
+function scanHeat() {
+  const rank = (key) => {
+    const idx = rows.map((r, i) => [r[key], i]).sort((a, b) => a[0] - b[0]);
+    const out = new Array(rows.length);
+    idx.forEach(([, i], k) => { out[i] = k / Math.max(1, rows.length - 1) * 100; });
+    return out;
+  };
+  const p1 = rank("c1"), p4 = rank("c4"), p24 = rank("c24"), p7 = rank("c7");
+  rows.forEach((r, i) => { r.heat = (p1[i] + p4[i] + p24[i] + p7[i]) / 4; });
+}
+function classifyS(r) {
+  const { c1, c4, c24, c7 } = r;
+  if (c1 > 0 && c4 > 0 && c24 > 0 && c7 > 0) return "四周期共振";
+  if (c1 > 0 && c4 > 0 && (c24 <= 0 || c7 <= 0)) return "短周期启动";
+  if (c7 > 0 && c24 > 0 && (c1 <= 0 || c4 <= 0)) return "趋势回调";
+  if (c7 < 0 && c24 <= 0 && c1 > 0) return "超跌反弹";
+  return "混合";
+}
+function runScan() {
+  scanHeat();
+  const sorted = [...rows].sort((a, b) => b.heat - a.heat);
+  $("scanSummary").textContent = `OKX现货${rows.length}对 · ${live ? "实时" : "快照"} · 四周期热度 · 点击行切换币种`;
+  $("scanBody").innerHTML = sorted.map((r, i) => {
+    const td = (v) => `<td class="num ${v >= 0 ? "up" : "down"}">${pct(v)}</td>`;
+    return `<tr class="srow" data-sym="${r.sym}">
+      <td class="dim">${i + 1}</td><td class="sym"><b>${r.sym}</b></td>
+      <td class="num">${fmtP(r.price)}</td>
+      ${td(r.c1)}${td(r.c4)}${td(r.c24)}${td(r.c7)}
+      <td class="num heatc">${Math.round(r.heat)}</td>
+      <td class="dim">${classifyS(r)}</td>
+      <td class="dim">${fmtVol(r.vol24)}</td>
+    </tr>`;
+  }).join("");
+  $("scanBody").querySelectorAll("tr").forEach(el =>
+    el.addEventListener("click", () => {
+      cur = el.dataset.sym;
+      localStorage.setItem("spot_last", cur);
+      $("coinSel").value = cur;
+      renderQuote();
+      renderStrip();
+      $("scanOverlay").classList.add("hidden");
+    }));
+  $("scanOverlay").classList.remove("hidden");
+}
+$("scanBtn").addEventListener("click", runScan);
+$("scanClose").addEventListener("click", () => $("scanOverlay").classList.add("hidden"));
+$("scanOverlay").addEventListener("click", (e) => { if (e.target.id === "scanOverlay") $("scanOverlay").classList.add("hidden"); });
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { $("scanOverlay").classList.add("hidden"); return; }
+  if ((e.key === "s" || e.key === "S") && !e.ctrlKey && !e.metaKey) {
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "select" || tag === "textarea") return;
+    e.preventDefault();
+    runScan();
+  }
+});
 
 // ---------- 刷新 ----------
 async function refreshAll() {
