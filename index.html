@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="开仓·现货 — OKX现货行情与模拟交易, 无杠杆无做空, T+0, 手续费0.1%">
+  <title>开仓 · 现货 (OKX)</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪙</text></svg>">
+  <link rel="stylesheet" href="style.css?v=2026091301">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">🪙 开仓 · 现货</div>
+    <div class="motto">OKX数据 · 无杠杆 · 无做空 · T+0 · 费率0.1%</div>
+    <div class="controls">
+      <select id="coinSel" title="选择币种(OKX现货USDT对)"></select>
+      <select id="intervalSel" title="自动刷新">
+        <option value="60" selected>60秒</option>
+        <option value="30">30秒</option>
+        <option value="180">3分</option>
+        <option value="0">手动</option>
+      </select>
+      <button id="refreshBtn">🔄</button>
+    </div>
+    <div class="status">
+      <span class="dot" id="statusDot"></span>
+      <span id="lastUpdate">--:--:--</span>
+      <span id="okxSrc" class="okx-src"></span>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">📊 <span id="qName">加载中</span> <span class="sub" id="qSub"></span></div>
+        <div class="quote-head">
+          <span class="qh-price" id="qPrice">--</span>
+          <span class="qh-chg" id="qChg">--</span>
+        </div>
+        <div class="metric-grid" id="metricGrid"></div>
+        <div class="card-sub">📉 日线 · 近250天 <span class="sub" id="chartNote"></span></div>
+        <div id="klineChart" class="kline-chart"></div>
+        <div id="rangeStats" class="range-stats"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💰 现货模拟交易 <span class="sub">买入用USDT · 卖出得USDT · 双边各0.1%手续费</span></div>
+        <div class="buy-form">
+          <label>金额(U) <input type="number" id="buyAmount" value="1000" min="10"></label>
+          <button id="buyBtn" class="buy-btn">🛒 买入</button>
+        </div>
+        <div id="buyPreview" class="buy-preview"></div>
+        <div class="card-sub">📌 持仓 <span class="sub" id="posSummary"></span></div>
+        <div id="posList" class="pos-list"><span class="loading">暂无持仓</span></div>
+        <div class="card-sub">📜 已完结 <span class="sub" id="histSummary"></span></div>
+        <div id="histList" class="hist-list"><span class="loading">暂无交易</span></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    数据源: OKX(实时优先, 不通时用GitHub Actions每10分钟快照) · 交易记录存本地浏览器 · 仅供学习研究
+  </footer>
+  <script src="app.js?v=2026091301"></script>
+</body>
+</html>
